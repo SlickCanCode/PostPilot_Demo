@@ -1,0 +1,142 @@
+<html>
+    <head>
+        <title>Home</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <link rel="stylesheet" href="/static/styles.css">
+    </head>
+    <body id="home">
+        <ul class="nav justify-content-center">
+  <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="{{ url_for('displayPosts') }}">Home</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{ url_for('post') }}">Schedule Post</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Contact Me</a>
+  </li>
+</ul>
+
+        <div class="hero">
+            <div class="header heroitem">
+            <h1>Hello User</h1> 
+            </div>
+            <div class="image heroitem">
+                <img src="/static/media icons.png" alt="">
+            </div>
+            <div class="footer heroitem">
+                <p>Welcome to PostPilot!<br>Consistency made simple</p>
+            </div>
+        </div>
+
+        
+            <h2 class="pp-header">SCHEDULED POSTS</h2>
+            <div class="scheduled-posts">
+            <ul>
+                {% for post in pendingPosts %}
+                <div class="pending-posts">
+                    <li>
+                        {% if post.image %}
+                        <div class="pp-image">
+                            {% set ext = post.image.split('.')[-1] | lower %}
+                            {% if ext in ['mp4', 'webm', 'ogg'] %}
+                                <video class="post-image" controls>
+                                    <source src="{{ url_for('static', filename='uploads/' + post.image) }}" type="video/{{ ext }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% else %}
+                                <img class="post-image" src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Post image">
+                            {% endif %}
+                        {% endif %}
+                        </div>
+                            
+
+                            <p class="pp-caption">{{ post.caption }}</p>
+                            <p class="pp-ts">{{ post.time_scheduled|smartdate }}</p>
+                            <div class="dropdown">
+                                <button class="btn kebab-btn" type="button".
+                                        id="kebabDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                        aria-label="Open options">
+                                        <!-- Three dots -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+                                    <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+                                    </svg>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="kebabDropdown">
+                                    <li><form method="GET" action="/post/{{ post.id }}"><button class="dropdown-item" type="submit" id="requestMoneyBtn">Edit post</button></form></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><form method="POST" action="/delete_post">
+                                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                                        <button class="dropdown-item text-danger" type="submit" id="deleteBtn">Delete post</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                    </li>
+                </div>
+                {% endfor %}
+            </ul>
+            </div>
+        
+
+        <h2 class="pp-header">PUBLISHED POSTS</h2>
+        <div class="published-posts">
+        <ul>
+            {% for post in postedPosts %}
+            <div class="post">
+            <li>
+                <div class="dropdown">
+          <button class="btn kebab-btn" type="button".
+                  id="kebabDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                  aria-label="Open options">
+                  <!-- Three dots -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+            <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+            </svg>
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="kebabDropdown">
+            <li><form method="GET" action="/post/{{ post.id }}"><button class="dropdown-item" type="submit" id="requestMoneyBtn">Edit post</button></form></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><form method="POST" action="/delete_post">
+                <input type="hidden" name="post_id" value="{{ post.id }}">
+                <button class="dropdown-item text-danger" type="submit" id="deleteBtn">Delete post</button>
+                </form>
+            </li>
+          </ul>
+        </div>
+                <p class="post-caption">{{ post.caption }}</p>
+
+                {% if post.image %}
+                <div class="post-media">
+                {% set ext = post.image.split('.')[-1] | lower %}
+                {% if ext in ['mp4', 'webm', 'ogg'] %}
+                    <video class="post-image" controls>
+                        <source src="{{post.image}}" type="video/{{ ext }}">
+                        Video Not Found!
+                    </video>
+                {% else %}
+                    <img class="post-image" src="{{post.image}}" alt="Image Not Found!">
+                {% endif %}
+                </div>
+                {% endif %}
+
+
+                <p class="post-plt">Active on
+                {% for i in post.platform %}
+                    <span>{{ i }}{% if not loop.last %}, {% else %}.{% endif %}</span>
+                {% endfor %}
+
+                </p>
+            </li>
+        </div>
+            {% endfor %}
+        </ul>
+        </div>
+        
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="/static/index.js"></script>
+</html>

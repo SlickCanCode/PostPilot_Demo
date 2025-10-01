@@ -1,0 +1,78 @@
+from flask import Flask, request, redirect, render_template
+from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, start_scheduler
+from datetime import datetime
+import os
+
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+
+with app.app_context():
+    start_scheduler(app)
+
+@app.route('/post', defaults={'post_id': None})
+@app.route('/post/<int:post_id>')
+def post(post_id):
+    if post_id:
+        post = getPost(post_id)
+        return render_template('scheduler.html', post = post)
+    else:   
+        return render_template('scheduler.html')
+
+@app.route('/schedule-post', methods=['POST'])
+def handle_schedule():
+    if request.method == 'POST':
+
+        post_id = request.form.get('post_id')
+        caption = request.form.get('caption')
+        time_scheduled = request.form.get('time_scheduled')
+        file_url = request.form.get('file_url')
+        platform = request.form.getlist('platforms')
+        
+        schedule_post(caption=caption, image=file_url, time_scheduled=time_scheduled, platforms=platform, post_id=post_id)
+        return redirect('/home')
+
+@app.route('/delete_post', methods=['POST'])
+def handle_deletePost():
+    if request.method == 'POST':
+        post_id = request.form.get('post_id')
+        deletePost(post_id)
+        return redirect('/home')
+        
+@app.route('/home')
+def displayPosts():
+    pendingPosts = getPendingPosts()
+    postedPosts = getPostedPosts()
+    return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts)
+
+
+# Jinja filters
+
+# for date
+def format_smart_date(dt):
+    now = datetime.now()
+    if dt.date() == now.date():
+        # Today → just time
+        return dt.strftime("%I:%M %p").lower()
+    elif dt.year == now.year:
+        # Same year but not today → show weekday + time
+        return dt.strftime("%a %I:%M %p").lower()
+    else:
+        # Different year → full date + time
+        return dt.strftime("%b %d, %Y %I:%M %p").lower()
+
+#for upload media
+def is_video(filename):
+    video_exts = ('.mp4', '.mov', '.avi', '.mkv', '.webm')
+    return filename.lower().endswith(video_exts)
+
+def is_image(filename):
+    image_exts = ('.jpg', '.jpeg', '.png', '.gif', '.bmp')
+    return filename.lower().endswith(image_exts)
+
+
+app.jinja_env.filters['smartdate'] = format_smart_date
+app.jinja_env.filters['is_video'] = is_video
+app.jinja_env.filters['is_image'] = is_image
+
+if __name__ == "__main__":
+    app.run(debug=True)
