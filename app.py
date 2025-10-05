@@ -25,10 +25,10 @@ def handle_schedule():
         post_id = request.form.get('post_id')
         caption = request.form.get('caption')
         time_scheduled = request.form.get('time_scheduled')
-        file_url = request.form.get('file_url')
+        file_url = request.form.get('file-url')
         platform = request.form.getlist('platforms')
-        
-        schedule_post(caption=caption, image=file_url, time_scheduled=time_scheduled, platforms=platform, post_id=post_id)
+        print(file_url)
+        schedule_post(caption=caption or None, image=file_url or None, time_scheduled=time_scheduled, platforms=platform, post_id=post_id)
         return redirect('/home')
 
 @app.route('/delete_post', methods=['POST'])
@@ -69,7 +69,11 @@ def is_image(filename):
     image_exts = ('.jpg', '.jpeg', '.png', '.gif', '.bmp')
     return filename.lower().endswith(image_exts)
 
+def show_if(value, fallback=''):
+    return value if value else fallback
 
+
+app.jinja_env.filters['show_if'] = show_if
 app.jinja_env.filters['smartdate'] = format_smart_date
 app.jinja_env.filters['is_video'] = is_video
 app.jinja_env.filters['is_image'] = is_image

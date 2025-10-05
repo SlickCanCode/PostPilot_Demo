@@ -6,9 +6,9 @@
         <link rel="stylesheet" href="/static/styles.css">
     </head>
     <body id="scheduler">
-  
-        
+
         <form action="/schedule-post" method="POST" enctype="multipart/form-data" id="scheduler-form">
+          <input type="text" class="file-url" name="file-url" style="display: none;">
             {% if post %}
     <input type="hidden" name="post_id" value="{{ post.id }}">
             {% endif %}
@@ -16,7 +16,7 @@
             <!-- Top Bar -->
     <div class="top-bar">
     <a href="{{ url_for('displayPosts') }}" class="text-dark text-decoration-none fw-semibold">Back</a>
-    <button class="btn btn-primary btn-sm px-3" type="submit">Post</button>
+    <button class="btn btn-primary btn-sm px-3" type="submit" id="postButton">Post</button>
   </div>
 
     <div class="caption-section">
@@ -39,9 +39,9 @@
         <video src="" class="preview-video" style="display: none;"></video>
         <button type="button" class="btn-close" aria-label="Close" style="display: none;"></button>
         {% endif %}
-            <input type="text" class="file-url" name="file-url" hidden>
+        
       </div>
-       
+      
   </div>
 
     <div id="bottomActions" class="bottom-actions">

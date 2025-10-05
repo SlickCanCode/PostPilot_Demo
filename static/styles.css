@@ -280,3 +280,91 @@ body {
       width: 200px;
       border: 1px dashed rgba(23, 23, 23, 0.374);
 }
+.posted-video {
+  aspect-ratio: 9 / 16;     
+  object-fit: cover;        
+  border-radius: 4px;       
+  display: block;
+  margin: 0 auto;            
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+
+.posted-video::-webkit-media-controls-panel {
+  background: rgba(0,0,0,0.2);
+}
+
+
+.posted-video:hover {
+  transform: scale(1.01);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .posted-video {
+    height: auto;
+    border-radius: 0;
+    aspect-ratio: 9 / 16;
+  }
+}
+.video-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform: translateY(0);
+}
+
+.video-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* While dragging/swiping */
+.video-overlay.dragging {
+  transition: none;
+}
+
+#overlayVideo {
+  width: 90vw;
+  height: 90vh;
+  object-fit: contain;
+  border-radius: 12px;
+  touch-action: none; /* Prevent scroll conflicts */
+}
+
+/* Close button */
+.close-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: transparent;
+  font-size: 32px;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  line-height: 0;
+  cursor: pointer;
+  z-index: 10000;
+  transition: background 0.2s ease;
+}
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 600px) {
+  #overlayVideo {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}

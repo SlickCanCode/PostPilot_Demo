@@ -3,10 +3,13 @@ from models.user import demo_userid
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
 
 
 
 def schedule_post(caption, image, time_scheduled, platforms,post_id=None): 
+    print(Post.__table__)
     if post_id:
         post = session.query(Post).filter(Post.id == post_id).first()
         if post:
@@ -30,7 +33,7 @@ def schedule_post(caption, image, time_scheduled, platforms,post_id=None):
         new_post = Post(
             user_id=demo_userid,
             caption=caption,
-            image=image,
+            image=image ,
             time_scheduled=time_scheduled,
             platform=platforms,
             status='Pending'
@@ -40,8 +43,14 @@ def schedule_post(caption, image, time_scheduled, platforms,post_id=None):
             session.commit()
             print(new_post.id)
             return new_post.id
+        
+        except IntegrityError as e:
+            session.rollback()
+            print("Database constraint violated:", str(e))
+            return "Either caption or image must be provided."
+
         except SQLAlchemyError as e:
-            session.rollback()  
+            session.rollback()
             print("Error creating post:", str(e))
             return str(e)
 

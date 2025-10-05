@@ -1,6 +1,31 @@
 
 if (document.body.id === "scheduler") {
 
+// Client side form validation 
+  const postButton = document.getElementById('postButton');
+  const captionInput = document.getElementById('caption');
+  const imageInput = document.getElementById('image-upload');
+  const dateInput = document.getElementById('scheduledDateTime');
+  const platformsInput = document.querySelectorAll('input[name="platforms"]');
+
+function togglePostButton(){
+  const caption = captionInput.value.trim();
+  const hasImage = imageInput.files.length > 0;
+  const hasPlatform = Array.from(platformsInput).some(checkbox => checkbox.checked);
+  const hasDate = dateInput.value.trim() !== "";
+
+  postButton.disabled = !( (caption || hasImage) && hasPlatform  && hasDate);
+}
+  captionInput.addEventListener('input', togglePostButton);
+  imageInput.addEventListener('change', togglePostButton);
+  dateInput.addEventListener('change', togglePostButton);
+  platformsInput.forEach(checkbox => {
+    checkbox.addEventListener('change', togglePostButton);
+  });
+
+  togglePostButton();
+
+
 // caption script
 window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('caption').focus();
@@ -95,23 +120,42 @@ imgCloseButton.addEventListener('click', function() {
     imgCloseButton.style.display = "none";
 })
 //video upload 
-document.getElementById('scheduler-form').addEventListener('submit', function() {
-  console.log("What's up");
-  let formData = new FormData();
+document.getElementById('scheduler-form').addEventListener('submit', async function (event) {
+  
+  event.preventDefault(); 
+  
+
+  const form = this;
+  const formData = new FormData();
   formData.append("file", selectedFile);
-  formData.append("upload_preset", "postpilot"); 
+  formData.append("upload_preset", "postpilot");
+  postButton.disabled = true;
+  console.log("Uploading to Cloudinary...");
 
-  fetch("https://api.cloudinary.com/v1_1/dm340hnd3/auto/upload", {
-    method: "POST",
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    document.querySelector('.file-url').value = data.secure_url;
-  });
+  try {
+    const res = await fetch("https://api.cloudinary.com/v1_1/dm340hnd3/auto/upload", {
+      method: "POST",
+      body: formData
+    });
 
-  })
-    
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Upload failed: ${res.status} ${res.statusText}\n${text}`);
+    }
+    const data = await res.json();
+    console.log("Upload success:", data);
+    document.querySelector(".file-url").value = data.secure_url;
+    form.submit();
+    postButton.disabled = false;
+
+  } catch (error) {
+    console.error("Error uploading to Cloudinary:", error);
+    alert("Upload failed. Please try again.");
+  }
+});
+
+
+
   
 
 // platforms script
@@ -140,3 +184,75 @@ if (window.visualViewport) {
       });
     }
 }
+
+
+
+//View video on homePage feed...
+const overlay = document.getElementById('videoOverlay');
+const overlayVideo = document.getElementById('overlayVideo');
+const closeBtn = document.getElementById('closeOverlayBtn');
+
+// Open overlay when a video is clicked
+document.querySelectorAll('.posted-video').forEach(video => {
+  video.addEventListener('click', () => {
+    overlay.classList.add('active');
+    overlayVideo.src = video.querySelector('source').src;
+    overlayVideo.play();
+  });
+});
+
+// Close overlay via button
+closeBtn.addEventListener('click', closeOverlay);
+
+function closeOverlay() {
+  overlay.classList.remove('active');
+  overlayVideo.pause();
+  overlayVideo.src = '';
+}
+
+/* --- Swipe to close functionality --- */
+let startY = 0;
+let currentY = 0;
+let isDragging = false;
+
+overlay.addEventListener('touchstart', (e) => {
+  startY = e.touches[0].clientY;
+  isDragging = true;
+});
+
+overlay.addEventListener('touchmove', (e) => {
+  if (!isDragging) return;
+  currentY = e.touches[0].clientY;
+  const diff = currentY - startY;
+  
+  // Move overlay slightly with the drag
+  if (diff > 0) {
+    overlay.classList.add('dragging');
+    overlay.style.transform = `translateY(${diff}px)`;
+    overlay.style.opacity = `${1 - diff / 400}`;
+  }
+});
+
+overlay.addEventListener('touchend', () => {
+  if (!isDragging) return;
+  isDragging = false;
+  overlay.classList.remove('dragging');
+
+  const diff = currentY - startY;
+  // If swipe down is big enough, close
+  if (diff > 120) {
+    overlay.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+    overlay.style.transform = 'translateY(100%)';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.style.transform = '';
+      overlay.style.opacity = '';
+      overlay.style.transition = '';
+      closeOverlay();
+    }, 250);
+  } else {
+    // Reset if drag was too small
+    overlay.style.transform = '';
+    overlay.style.opacity = '';
+  }
+});
