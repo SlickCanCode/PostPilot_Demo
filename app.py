@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template
 from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, start_scheduler
+from services.userService import getUser
 from datetime import datetime
 import os
 
@@ -42,7 +43,9 @@ def handle_deletePost():
 def displayPosts():
     pendingPosts = getPendingPosts()
     postedPosts = getPostedPosts()
-    return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts)
+    userDetails = getUser()
+    print(userDetails.username)
+    return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts, userDetails = userDetails)
 
 
 # Jinja filters
@@ -50,15 +53,22 @@ def displayPosts():
 # for date
 def format_smart_date(dt):
     now = datetime.now()
+
     if dt.date() == now.date():
         # Today → just time
         return dt.strftime("%I:%M %p").lower()
     elif dt.year == now.year:
-        # Same year but not today → show weekday + time
-        return dt.strftime("%a %I:%M %p").lower()
+        # Same year but not today
+        if dt.isocalendar().week == now.isocalendar().week:
+            # Same week → weekday + time
+            return dt.strftime("%a %I:%M %p").lower()
+        else:
+            # Same year but different week → month + day + time
+            # Use %#d for Windows compatibility
+            return dt.strftime("%b %#d %I:%M %p").lower()
     else:
         # Different year → full date + time
-        return dt.strftime("%b %d, %Y %I:%M %p").lower()
+        return dt.strftime("%b %#d, %Y %I:%M %p").lower()
 
 #for upload media
 def is_video(filename):

@@ -119,9 +119,10 @@ imgCloseButton.addEventListener('click', function() {
     previewVideo.style.display = "none";
     imgCloseButton.style.display = "none";
 })
-//video upload 
+//media upload 
 document.getElementById('scheduler-form').addEventListener('submit', async function (event) {
-  
+  if (selectedFile!= null) {
+
   event.preventDefault(); 
   
 
@@ -151,6 +152,7 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
   } catch (error) {
     console.error("Error uploading to Cloudinary:", error);
     alert("Upload failed. Please try again.");
+  }
   }
 });
 
@@ -185,6 +187,61 @@ if (window.visualViewport) {
     }
 }
 
+
+if (document.body.id === "homePage") {
+
+// See more Caption
+document.addEventListener("DOMContentLoaded", () => {
+  const captions = document.querySelectorAll(".post-caption");
+  const seeMoreButtons = document.querySelectorAll(".see-more");
+
+  captions.forEach((caption, i) => {
+    const btn = seeMoreButtons[i];
+    // Check if the caption is truncated (scrollHeight > clientHeight)
+    if (caption.scrollHeight > caption.clientHeight + 5) {
+      btn.style.display = "inline"; // Show "See more"
+    } else {
+      btn.style.display = "none"; // Hide if it's short
+    }
+
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const captionElement = document.getElementById(`caption-${id}`);
+      const isExpanded = btn.textContent.includes("less");
+
+      if (isExpanded) {
+        // Collapse back to 3 lines
+        captionElement.style.webkitLineClamp = "3";
+        captionElement.style.overflow = "hidden";
+        btn.textContent = "See more...";
+      } else {
+        // Expand fully
+        captionElement.style.webkitLineClamp = "unset";
+        captionElement.style.overflow = "visible";
+        btn.textContent = "See less";
+      }
+    });
+  });
+});
+
+
+// Delete Modal
+  let selectedForm = null;
+
+  // When modal is about to show
+  const modal = document.getElementById('modalChoice');
+  modal.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget; // Button that triggered the modal
+    const postId = button.getAttribute('data-post-id');
+    selectedForm = button.closest('form'); // Find the correct form
+  });
+
+  // When user confirms delete
+  document.getElementById('confirmDelete').addEventListener('click', () => {
+    if (selectedForm) {
+      selectedForm.submit();
+    }
+  });
 
 
 //View video on homePage feed...
@@ -256,3 +313,4 @@ overlay.addEventListener('touchend', () => {
     overlay.style.opacity = '';
   }
 });
+}
