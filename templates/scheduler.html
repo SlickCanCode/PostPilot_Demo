@@ -45,13 +45,21 @@
   </div>
 
     <div id="bottomActions" class="bottom-actions">
+      <div class="views">
+        <p class="date-view"></p>
+        <p class="platforms-view"></p>
+      </div>
+      <div class="actions">
         <button class="btn p-2 border-0 bg-transparent" type="button">
         <input type="file" name="image" id="image-upload" hidden>
         <label for="image-upload"><img src="/static/assets/image icon.png" alt="upload" class="upload-image"></label>
         </button>
                 
-        <button class="action-btn" data-bs-toggle="modal" data-bs-target="#dateModal" type="button" id="SelectDatebtn">Select Date</button>
-        <button class="action-btn" type="button" data-bs-toggle="modal" data-bs-target="#platformModal" id="platformBtn">Select Platforms</button>
+        <button class="action-btn" data-bs-toggle="modal" data-bs-target="#dateModal" type="button" id="SelectDatebtn"><img src="/static/assets/calendar-plus.svg" alt=""></button>
+        <button class="action-btn" type="button" data-bs-toggle="modal" data-bs-target="#platformModal" id="platformBtn"><img src="/static/assets/twitch.svg" alt=""></button>
+        <button class="generate-caption btn btn-primary" type="button"><img src="/static/assets/claude 1.svg" alt=""><span>Ai generated caption</span></button>
+      </div>
+        
     </div>
 
     <!-- Date Modal -->

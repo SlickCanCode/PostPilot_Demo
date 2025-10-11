@@ -25,6 +25,7 @@ function togglePostButton(){
 
   togglePostButton();
 
+document.querySelector(".generate-caption").disabled = true;
 
 // caption script
 window.addEventListener('DOMContentLoaded', () => {
@@ -45,7 +46,7 @@ textarea.addEventListener("input", () => {
     
 function setDateButton() {
   const value = scheduledDateTimeInput.value;
-  const dateButton = document.getElementById('SelectDatebtn');
+  const dateView = document.querySelector('.date-view');
   if (value){
        const date = new Date(value);
       const options = { 
@@ -56,13 +57,12 @@ function setDateButton() {
         hour: "numeric", 
         minute: "2-digit" 
       };
-      dateButton.textContent = date.toLocaleString(undefined, options);
+      dateView.textContent = date.toLocaleString(undefined, options);
     }else{
-      dateButton.textContent = "Select Date";
+      dateView.textContent = "";
     }
 }
 
-setDateButton();
 
 document.getElementById('dateModal').addEventListener('show.bs.modal', () => {
   const now = new Date();
@@ -81,7 +81,6 @@ document.getElementById('dateModal').addEventListener('show.bs.modal', () => {
   scheduledDateTimeInput.min = currentDateTime; });
 
   document.getElementById('saveDate').addEventListener('click', setDateButton)
-
 
 
 // image upload script
@@ -163,13 +162,13 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
 // platforms script
 document.getElementById("savePlatforms").addEventListener("click", function () {
     const checkboxes = document.querySelectorAll("input[name='platforms']:checked");
-    const btn = document.getElementById("platformBtn");
+    const platformPreview = document.querySelector('.platforms-view');
 
     if (checkboxes.length > 0) {
       const values = Array.from(checkboxes).map(cb => cb.value);
-      btn.textContent = values.join(", ");
+      platformPreview.textContent = "To be active on " + values.join(", ");
     } else {
-      btn.textContent = "Select Platforms";
+      platformPreview.textContent = "";
     }
   });
 
@@ -213,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Collapse back to 3 lines
         captionElement.style.webkitLineClamp = "3";
         captionElement.style.overflow = "hidden";
-        btn.textContent = "See more...";
+        btn.textContent = "See more";
       } else {
         // Expand fully
         captionElement.style.webkitLineClamp = "unset";
