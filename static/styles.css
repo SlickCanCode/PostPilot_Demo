@@ -595,10 +595,9 @@ li > .dropdown{
 }
 
 #imageOverlay img {
-  max-width: 95%;
-  max-height: 90%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  border: 1px dashed black;
 }
 
 /* Close button */

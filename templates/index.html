@@ -134,12 +134,12 @@
                
             <!-- POST MEDIA -->
                 {% if post.image %}
-<div class="post-media">
+<div class="post-media" data-media='{{ post.image | tojson | safe }}'>
   {% for i in post.image %}
     {% set ext = i.split('.')[-1] | lower %}
     {% if ext in ['mp4', 'webm', 'ogg'] %}
       <div class="media-item">
-        <video class="post-image posted-video" autoplay muted loop playsinline preload="metadata" onclick="openVideoOverlay('{{ i }}')">
+        <video class="post-image posted-video" autoplay muted loop playsinline preload="metadata" >
           <source src="{{ i }}" type="video/{{ ext }}">
           Video Not Found!
         </video>
@@ -147,32 +147,11 @@
 
     {% else %}
       <div class="media-item">
-        <img class="post-image" src="{{ i }}" alt="Image Not Found!" onclick="openImageOverlay('{{ i }}')">
+        <img class="post-image" src="{{ i }}" alt="Image Not Found!">
       </div>
     {% endif %}
 
   {% endfor %}
-</div>
-
-<!-- Fullscreen overlay (outside the loop) -->
-        <div id="imageOverlay">
-        <button class="close-btn" onclick="closeImageOverlay()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
-      <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"></path>
-    </svg>
-  </button>
-        <img src="" alt="Full image preview">
-        </div>
-
-<div class="video-overlay" id="videoOverlay">
-  <button class="close-btn" id="closeOverlayBtn">
-    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor"
-         class="bi bi-arrow-left-short" viewBox="0 0 16 16">
-      <path fill-rule="evenodd"
-            d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
-    </svg>
-  </button>
-  <video id="overlayVideo" controls playsinline muted></video>
 </div>
 
 {% endif %}
@@ -188,6 +167,18 @@
             </li>
             {% endfor %}
         </ul>
+        </div>
+
+        <!-- Fullscreen overlay (outside the loop) -->
+        <div id="imageOverlay">
+        <button class="close-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"></path>
+    </svg>
+  </button>
+    <div  class="gallery-content">
+        <img src="" alt="Full image preview">
+    </div>
         </div>
 
         <!-- Confirmation Modal -->

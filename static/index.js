@@ -275,133 +275,92 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-//View video on homePage feed...
-const overlay = document.getElementById('videoOverlay');
-const overlayVideo = document.getElementById('overlayVideo');
-const closeBtn = document.getElementById('closeOverlayBtn');
 
-// Open overlay when a video is clicked
-document.querySelectorAll('.posted-video').forEach(video => {
-  video.addEventListener('click', () => {
-    overlay.classList.add('active');
-    overlayVideo.src = video.querySelector('source').src;
-    overlayVideo.play();
-  });
-});
+const allPostMedia = document.querySelectorAll('.post-media');
+  let galleryIndex = 0;
+  let galleryItems = [];
 
-// Close overlay via button
-closeBtn.addEventListener('click', closeOverlay);
+  allPostMedia.forEach(container => {
+    const items = container.querySelectorAll('.media-item');
+    const count = items.length;
 
-function closeOverlay() {
-  overlay.classList.remove('active');
-  overlayVideo.pause();
-  overlayVideo.src = '';
-}
+    container.classList.remove('single','double','grid');
+    if (count === 1) container.classList.add('single');
+    else if (count === 2) container.classList.add('double');
+    else if (count >= 3) {
+      container.classList.add('grid');
+      items.forEach((item, i) => { item.style.display = i < 4 ? 'block' : 'none'; });
 
-/* --- Swipe to close functionality --- */
-let startY = 0;
-let currentY = 0;
-let isDragging = false;
+      if (count > 4) {
+        const overlay = document.createElement('div');
+        overlay.className = 'more-overlay';
+        overlay.textContent = `+${count - 4}`;
+        container.appendChild(overlay);
 
-overlay.addEventListener('touchstart', (e) => {
-  startY = e.touches[0].clientY;
-  isDragging = true;
-});
-
-overlay.addEventListener('touchmove', (e) => {
-  if (!isDragging) return;
-  currentY = e.touches[0].clientY;
-  const diff = currentY - startY;
-  
-  // Move overlay slightly with the drag
-  if (diff > 0) {
-    overlay.classList.add('dragging');
-    overlay.style.transform = `translateY(${diff}px)`;
-    overlay.style.opacity = `${1 - diff / 400}`;
-  }
-});
-
-overlay.addEventListener('touchend', () => {
-  if (!isDragging) return;
-  isDragging = false;
-  overlay.classList.remove('dragging');
-
-  const diff = currentY - startY;
-  // If swipe down is big enough, close
-  if (diff > 120) {
-    overlay.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-    overlay.style.transform = 'translateY(100%)';
-    overlay.style.opacity = '0';
-    setTimeout(() => {
-      overlay.style.transform = '';
-      overlay.style.opacity = '';
-      overlay.style.transition = '';
-      closeOverlay();
-    }, 250);
-  } else {
-    // Reset if drag was too small
-    overlay.style.transform = '';
-    overlay.style.opacity = '';
-  }
-});
-
-document.querySelectorAll('.post-media').forEach(container => {
-  const items = container.querySelectorAll('.media-item');
-  const count = items.length;
-
-  container.classList.remove('single', 'double', 'grid');
-
-  if (count === 1) {
-    container.classList.add('single');
-  } else if (count === 2) {
-    container.classList.add('double');
-  } else if (count >= 3) {
-    container.classList.add('grid');
-
-    // Show only first 4 media
-    items.forEach((item, i) => {
-      item.style.display = i < 4 ? 'block' : 'none';
-    });
-
-    // Add +N overlay
-    if (count > 4) { 
-      const overlay = document.createElement('div');
-      overlay.className = 'more-overlay';
-      overlay.textContent = `+${count - 4}`;
-      overlay.onclick = () => openGallery(container);
-      container.appendChild(overlay);
+        overlay.addEventListener('click', () => {
+          const media = JSON.parse(container.dataset.media);
+          openGallery(0, media);
+        });
+      }
     }
+
+    // Click listeners for each media
+    items.forEach((item, index) => {
+      const media = JSON.parse(container.dataset.media);
+      item.addEventListener('click', () => openGallery(index, media));
+    });
+  });
+
+  const galleryOverlay = document.getElementById('imageOverlay');
+  const mediaContainer = galleryOverlay.querySelector('.gallery-content');
+  const ImagecloseBtn = galleryOverlay.querySelector('.close-btn');
+
+  function openGallery(index, items) {
+    galleryItems = items;
+    galleryIndex = index;
+    showGalleryMedia();
+    galleryOverlay.style.display = 'flex';
   }
 
-  // Ensure videos autoplay/mute
-  container.querySelectorAll('video').forEach(v => {
-    v.muted = true;
-    v.loop = true;
-    v.autoplay = true;
-    v.playsInline = true;
+  function showGalleryMedia() {
+    mediaContainer.innerHTML = '';
+    const src = galleryItems[galleryIndex];
+    const ext = src.split('.').pop().toLowerCase();
+    let element;
+
+    if (['mp4', 'webm', 'ogg'].includes(ext)) {
+      element = document.createElement('video');
+      element.src = src;
+      element.controls = true;
+      element.autoplay = true;
+    } else {
+      element = document.createElement('img');
+      element.src = src;
+    }
+
+    element.className = 'gallery-media';
+    mediaContainer.appendChild(element);
+  }
+
+  function closeGallery() {
+    galleryOverlay.style.display = 'none';
+  }
+
+  ImagecloseBtn.addEventListener('click', closeGallery);
+
+  // Swipe-only navigation
+  let startX = 0;
+  galleryOverlay.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+  galleryOverlay.addEventListener('touchend', e => {
+    const diffX = e.changedTouches[0].clientX - startX;
+    if (Math.abs(diffX) > 50) {
+      if (diffX < 0 && galleryIndex < galleryItems.length - 1) {
+        galleryIndex++;
+        showGalleryMedia();
+      } else if (diffX > 0 && galleryIndex > 0) {
+        galleryIndex--;
+        showGalleryMedia();
+      }
+    }
   });
-});
-
-const imageOverlay = document.getElementById('imageOverlay');
-
-
-/* Image Overlay */
-function openImageOverlay(src) {
-  const image = imageOverlay.querySelector('img');
-  image.src = src;
-  overlay.style.display = 'flex';
-}
-
-function closeImageOverlay() {
-  document.getElementById('imageOverlay').style.display = 'none';
-}
-
-/* Open all media in modal (triggered by +N) */
-function openGallery(container) {
-  const allImages = [...container.querySelectorAll('img')].map(img => img.src);
-  const firstImage = allImages[0];
-  handleGesture(allImages)
-  openImageOverlay(firstImage);
-}
-
 }
