@@ -39,14 +39,14 @@
                         
                         <div class="pp-image">
                             {% if post.image %}
-                            {% set ext = post.image.split('.')[-1] | lower %}
+                            {% set ext = post.image[0].split('.')[-1] | lower %}
                             {% if ext in ['mp4', 'webm', 'ogg'] %}
                                 <video class="post-image" controls>
-                                    <source src="{{ post.image }}" type="video/{{ ext }}">
+                                    <source src="{{ post.image[0] }}" type="video/{{ ext }}">
                                     Your browser does not support the video tag.
                                 </video>
                             {% else %}
-                                <img class="post-image" src="{{ post.image }}" alt="Post image">
+                                <img class="post-image" src="{{ post.image[0] }}" alt="Post image">
                             {% endif %}
                             {% else %}
                             <img  class="post-image" src="/static/uploads/ppLogo.png" alt="">
@@ -76,7 +76,7 @@
                                     <li><hr class="dropdown-divider"></li>
                                     <li><form method="POST" action="/delete_post">
                                         <input type="hidden" name="post_id" value="{{ post.id }}">
-                                        <button class="dropdown-item text-danger" type="submit" id="deleteBtn">Delete post</button>
+                                        <button class="dropdown-item text-danger" type="submit" id="deleteBtn" data-bs-toggle="modal" data-bs-target="#modalChoice">Delete post</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -132,29 +132,51 @@
                 <span class="see-more" data-id="{{ post.id }}">See more</span>
             </div>
                
-
+            <!-- POST MEDIA -->
                 {% if post.image %}
-                <div class="post-media">
-                {% set ext = post.image.split('.')[-1] | lower %}
-                {% if ext in ['mp4', 'webm', 'ogg'] %}
-                    <video class="post-image posted-video" autoplay muted loop playsinline preload="metadata">
-                        <source src="{{post.image}}" type="video/{{ ext }}">
-                        Video Not Found!
-                    </video>
-                                            <!-- Fullscreen overlay -->
-                        <div class="video-overlay" id="videoOverlay">
-                            <button class="close-btn" id="closeOverlayBtn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
-                                </svg>
-                            </button>
-                            <video id="overlayVideo" controls playsinline muted></video>
-                        </div>
-                {% else %}
-                    <img class="post-image" src="{{post.image}}" alt="Image Not Found!">
-                {% endif %}
-                </div>
-                {% endif %}
+<div class="post-media">
+  {% for i in post.image %}
+    {% set ext = i.split('.')[-1] | lower %}
+    {% if ext in ['mp4', 'webm', 'ogg'] %}
+      <div class="media-item">
+        <video class="post-image posted-video" autoplay muted loop playsinline preload="metadata" onclick="openVideoOverlay('{{ i }}')">
+          <source src="{{ i }}" type="video/{{ ext }}">
+          Video Not Found!
+        </video>
+      </div>
+
+    {% else %}
+      <div class="media-item">
+        <img class="post-image" src="{{ i }}" alt="Image Not Found!" onclick="openImageOverlay('{{ i }}')">
+      </div>
+    {% endif %}
+
+  {% endfor %}
+</div>
+
+<!-- Fullscreen overlay (outside the loop) -->
+        <div id="imageOverlay">
+        <button class="close-btn" onclick="closeImageOverlay()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"></path>
+    </svg>
+  </button>
+        <img src="" alt="Full image preview">
+        </div>
+
+<div class="video-overlay" id="videoOverlay">
+  <button class="close-btn" id="closeOverlayBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor"
+         class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+      <path fill-rule="evenodd"
+            d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
+    </svg>
+  </button>
+  <video id="overlayVideo" controls playsinline muted></video>
+</div>
+
+{% endif %}
+
 
 
                 <p class="post-plt">Active on
@@ -167,7 +189,6 @@
             {% endfor %}
         </ul>
         </div>
-
 
         <!-- Confirmation Modal -->
 <div class="modal fade" id="modalChoice" tabindex="-1" aria-labelledby="modalChoiceLabel" aria-hidden="true">

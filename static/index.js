@@ -86,78 +86,104 @@ document.getElementById('dateModal').addEventListener('show.bs.modal', () => {
 // image upload script
 let selectedFile = null;
 const input = document.getElementById('image-upload');
-const preview = document.querySelector('.preview');
-const previewVideo = document.querySelector('.preview-video');
-const imgCloseButton = document.querySelector('.btn-close');
-    input.addEventListener('change',readImage);
-    
-    function readImage() {
-        const file = this.files[0];
-        selectedFile = file;
-      if (file) {
-        const url = URL.createObjectURL(file);
+const previewContainer = document.querySelector('.image-container');
+const deleteButton = document.createElement('button');
+      deleteButton.classList.add('btn-close');
+      deleteButton.ariaLabel = "Close";
+      deleteButton.type = "button";
+let selectedFiles = [];
+
+      input.addEventListener('change', (e) => {
+      previewContainer.classList.remove('multipleMedia');
+      previewContainer.innerHTML = '';
+      selectedFiles = Array.from(e.target.files);
+      
+      if (selectedFiles.length === 1) {
+        const file = selectedFiles[0];
+        const fileURL = URL.createObjectURL(file);
+        const div = document.createElement('div');
         
-          if (file.type.startsWith("image/")) {
-            preview.src = url;
-            preview.style.display = "block";
-            imgCloseButton.style.display = "block";
-          } else if(file.type.startsWith("video/")) {
-            previewVideo.src = url;
-            previewVideo.style.display = "block";
-            imgCloseButton.style.display = "block";
-            previewVideo.play();
-          }
+        if (file.type.startsWith('image')) {
+          div.innerHTML = `<img src="${fileURL}" alt="preview" class="preview">`;
+          
+        } else if (file.type.startsWith('video')) {
+          div.innerHTML = `<video src="${fileURL}" class="preview-video" autoplay></video>`;
+        }
+         previewContainer.appendChild(div);
+         
 
+      } else {
+        selectedFiles.forEach((file, index) => {
+        const fileURL = URL.createObjectURL(file);
+        const div = document.createElement('div');
+        div.classList.add('preview-item');
+        div.dataset.index = index;
+        previewContainer.classList.add('multipleMedia');
+        if (file.type.startsWith('image')) {
+          div.innerHTML = `<img src="${fileURL}" alt="preview">`;
+        } else if (file.type.startsWith('video')) {
+          div.innerHTML = `<video src="${fileURL}" muted></video>`;
+        }
+        previewContainer.appendChild(div);
+      });
       }
-    }
-
-imgCloseButton.addEventListener('click', function() {
-    preview.src = "";
-    previewVideo.src = "";
-    preview.style.display = "none";
-    previewVideo.style.display = "none";
-    imgCloseButton.style.display = "none";
-})
-//media upload 
-document.getElementById('scheduler-form').addEventListener('submit', async function (event) {
-  if (selectedFile!= null) {
-
-  event.preventDefault(); 
-  
-
-  const form = this;
-  const formData = new FormData();
-  formData.append("file", selectedFile);
-  formData.append("upload_preset", "postpilot");
-  postButton.disabled = true;
-  console.log("Uploading to Cloudinary...");
-
-  try {
-    const res = await fetch("https://api.cloudinary.com/v1_1/dm340hnd3/auto/upload", {
-      method: "POST",
-      body: formData
+      previewContainer.appendChild(deleteButton);
     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Upload failed: ${res.status} ${res.statusText}\n${text}`);
-    }
-    const data = await res.json();
-    console.log("Upload success:", data);
-    document.querySelector(".file-url").value = data.secure_url;
-    form.submit();
-    postButton.disabled = false;
+deleteButton.addEventListener('click',function () {
+  input.value = ""; 
+  previewContainer.innerHTML = "";
+})
 
-  } catch (error) {
-    console.error("Error uploading to Cloudinary:", error);
-    alert("Upload failed. Please try again.");
-  }
+
+//media upload 
+document.getElementById('scheduler-form').addEventListener('submit', async function (event) {
+  if (selectedFiles && selectedFiles.length > 0) {
+
+    event.preventDefault();
+
+    const form = this;
+    postButton.disabled = true;
+    console.log("Uploading multiple files to Cloudinary (parallel)...");
+
+    try {
+      // Map each file to an upload promise
+      const uploadPromises = selectedFiles.map(file => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "postpilot");
+
+        return fetch("https://api.cloudinary.com/v1_1/dm340hnd3/auto/upload", {
+          method: "POST",
+          body: formData
+        }).then(async res => {
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Upload failed: ${res.status} ${res.statusText}\n${text}`);
+          }
+          return res.json();
+        });
+      });
+
+      // Wait for all uploads to complete
+      const results = await Promise.all(uploadPromises);
+      const uploadedUrls = results.map(r => r.secure_url);
+
+      // Save URLs in hidden field (as JSON)
+      document.querySelector(".file-url").value = JSON.stringify(uploadedUrls);
+      console.log("All uploads complete:", uploadedUrls);
+
+      form.submit();
+      postButton.disabled = false;
+
+    } catch (error) {
+      console.error("Error uploading to Cloudinary:", error);
+      alert("One or more uploads failed. Please try again.");
+      postButton.disabled = false;
+    }
   }
 });
 
-
-
-  
 
 // platforms script
 document.getElementById("savePlatforms").addEventListener("click", function () {
@@ -184,7 +210,13 @@ if (window.visualViewport) {
         }
       });
     }
+
+
 }
+
+
+
+// HOME PAGE 
 
 
 if (document.body.id === "homePage") {
@@ -312,4 +344,64 @@ overlay.addEventListener('touchend', () => {
     overlay.style.opacity = '';
   }
 });
+
+document.querySelectorAll('.post-media').forEach(container => {
+  const items = container.querySelectorAll('.media-item');
+  const count = items.length;
+
+  container.classList.remove('single', 'double', 'grid');
+
+  if (count === 1) {
+    container.classList.add('single');
+  } else if (count === 2) {
+    container.classList.add('double');
+  } else if (count >= 3) {
+    container.classList.add('grid');
+
+    // Show only first 4 media
+    items.forEach((item, i) => {
+      item.style.display = i < 4 ? 'block' : 'none';
+    });
+
+    // Add +N overlay
+    if (count > 4) { 
+      const overlay = document.createElement('div');
+      overlay.className = 'more-overlay';
+      overlay.textContent = `+${count - 4}`;
+      overlay.onclick = () => openGallery(container);
+      container.appendChild(overlay);
+    }
+  }
+
+  // Ensure videos autoplay/mute
+  container.querySelectorAll('video').forEach(v => {
+    v.muted = true;
+    v.loop = true;
+    v.autoplay = true;
+    v.playsInline = true;
+  });
+});
+
+const imageOverlay = document.getElementById('imageOverlay');
+
+
+/* Image Overlay */
+function openImageOverlay(src) {
+  const image = imageOverlay.querySelector('img');
+  image.src = src;
+  overlay.style.display = 'flex';
+}
+
+function closeImageOverlay() {
+  document.getElementById('imageOverlay').style.display = 'none';
+}
+
+/* Open all media in modal (triggered by +N) */
+function openGallery(container) {
+  const allImages = [...container.querySelectorAll('img')].map(img => img.src);
+  const firstImage = allImages[0];
+  handleGesture(allImages)
+  openImageOverlay(firstImage);
+}
+
 }

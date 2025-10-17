@@ -10,13 +10,14 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 def schedule_post(caption, image, time_scheduled, platforms,post_id=None): 
     print(Post.__table__)
+    if not image or image == [None] or image == ['']:
+        image = None
     if post_id:
         post = session.query(Post).filter(Post.id == post_id).first()
         if post:
             if caption:
                 post.caption = caption
             if image:
-                print(post.image)
                 post.image = image
             if time_scheduled:
                 post.time_scheduled = time_scheduled

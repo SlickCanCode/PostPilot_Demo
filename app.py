@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template
 from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, start_scheduler
 from services.userService import getUser
 from datetime import datetime
+import json
 import os
 
 app = Flask(__name__)
@@ -27,6 +28,8 @@ def handle_schedule():
         caption = request.form.get('caption')
         time_scheduled = request.form.get('time_scheduled')
         file_url = request.form.get('file-url')
+        if file_url:
+            file_url = json.loads(file_url)
         platform = request.form.getlist('platforms')
         print(file_url)
         schedule_post(caption=caption or None, image=file_url or None, time_scheduled=time_scheduled, platforms=platform, post_id=post_id)
