@@ -86,53 +86,123 @@ document.getElementById('dateModal').addEventListener('show.bs.modal', () => {
 // image upload script
 let selectedFile = null;
 const input = document.getElementById('image-upload');
-const previewContainer = document.querySelector('.image-container');
+const previewContainer = document.querySelector('.post-media');
 const deleteButton = document.createElement('button');
       deleteButton.classList.add('btn-close');
       deleteButton.ariaLabel = "Close";
       deleteButton.type = "button";
 let selectedFiles = [];
 
-      input.addEventListener('change', (e) => {
-      previewContainer.classList.remove('multipleMedia');
-      previewContainer.innerHTML = '';
-      selectedFiles = Array.from(e.target.files);
-      
-      if (selectedFiles.length === 1) {
-        const file = selectedFiles[0];
-        const fileURL = URL.createObjectURL(file);
-        const div = document.createElement('div');
-        
-        if (file.type.startsWith('image')) {
-          div.innerHTML = `<img src="${fileURL}" alt="preview" class="preview">`;
-          
-        } else if (file.type.startsWith('video')) {
-          div.innerHTML = `<video src="${fileURL}" class="preview-video" autoplay></video>`;
-        }
-         previewContainer.appendChild(div);
-         
+// For Existing Posts 
+if (previewContainer.hasAttribute('data-media')) { 
+  deleteButton.style.zIndex = 999;
+  const mediaItems = previewContainer.querySelectorAll('.media-item');
+  const mediaCount = mediaItems.length;
+  previewContainer.classList.remove('single', 'double', 'grid');
+  if (mediaCount === 1) previewContainer.classList.add('single');
+      else if (mediaCount === 2) previewContainer.classList.add('double');
+      else if (mediaCount >= 3) {
+        previewContainer.classList.add('grid');
+        mediaItems.forEach((item, i) => { item.style.display = i < 4 ? 'block' : 'none'; });
 
-      } else {
-        selectedFiles.forEach((file, index) => {
-        const fileURL = URL.createObjectURL(file);
-        const div = document.createElement('div');
-        div.classList.add('preview-item');
-        div.dataset.index = index;
-        previewContainer.classList.add('multipleMedia');
-        if (file.type.startsWith('image')) {
-          div.innerHTML = `<img src="${fileURL}" alt="preview">`;
-        } else if (file.type.startsWith('video')) {
-          div.innerHTML = `<video src="${fileURL}" muted></video>`;
+        if (count > 4) {
+          const overlay = document.createElement('div');
+          overlay.className = 'more-overlay';
+          overlay.textContent = `+${count - 4}`;
+          previewContainer.appendChild(overlay);
+
+          overlay.addEventListener('click', () => {
+            const media = JSON.parse(previewContainer.dataset.media);
+            openGallery(0, media);
+          });
         }
-        previewContainer.appendChild(div);
-      });
       }
-      previewContainer.appendChild(deleteButton);
+
+      // Click listeners for each media
+      mediaItems.forEach((item, index) => {
+        const media = JSON.parse(previewContainer.dataset.media);
+        item.addEventListener('click', () => openGallery(index, media));
+      });
+
+} else {
+  input.addEventListener('change', (e) => {
+        previewContainer.innerHTML = '';
+        selectedFiles = Array.from(e.target.files);
+        
+        const mediaUrls = selectedFiles.map(file => URL.createObjectURL(file));
+
+    // Store them in the same format as real posts
+    previewContainer.dataset.media = JSON.stringify(mediaUrls);
+
+    // Set layout style dynamically
+    previewContainer.className = 'post-media';
+    const count = mediaUrls.length;
+    if (count === 1) previewContainer.classList.add('single');
+    else if (count === 2) previewContainer.classList.add('double');
+    else if (count >= 3) previewContainer.classList.add('grid');
+
+    // Create media items
+    mediaUrls.forEach((url, index) => {
+      const div = document.createElement('div');
+      div.classList.add('media-item');
+      div.dataset.index = index;
+
+      const ext = url.split('.').pop().toLowerCase();
+
+      if (['mp4', 'webm', 'ogg'].includes(ext)) {
+        const video = document.createElement('video');
+        video.src = url;
+        video.className = 'post-video post-image';
+        video.muted = true;
+        video.loop = true;
+        video.autoplay = true;
+        video.playsInline = true;
+        div.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = 'preview';
+        img.className = 'post-image';
+        div.appendChild(img);
+      }
+
+      previewContainer.appendChild(div);
     });
+
+    // Apply same responsive grid & "+X more" overlay logic
+    const items = previewContainer.querySelectorAll('.media-item');
+    const countItems = items.length;
+
+    // Limit to first 4 items if more
+    if (countItems > 4) {
+      items.forEach((item, i) => { item.style.display = i < 4 ? 'block' : 'none'; });
+
+      const overlay = document.createElement('div');
+      overlay.className = 'more-overlay';
+      overlay.textContent = `+${countItems - 4}`;
+      previewContainer.appendChild(overlay);
+
+      overlay.addEventListener('click', () => {
+        const media = JSON.parse(previewContainer.dataset.media);
+        openGallery(0, media);
+      });
+    }
+
+    // Add click listeners to open gallery overlay
+    const allItems = previewContainer.querySelectorAll('.media-item');
+    allItems.forEach((item, index) => {
+      const media = JSON.parse(previewContainer.dataset.media);
+      item.addEventListener('click', () => openGallery(index, media));
+    });
+
+    previewContainer.appendChild(deleteButton);
+  });
+}
 
 deleteButton.addEventListener('click',function () {
   input.value = ""; 
   previewContainer.innerHTML = "";
+  deleteButton.style.display = "none";
 })
 
 
@@ -275,7 +345,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-
 const allPostMedia = document.querySelectorAll('.post-media');
   let galleryIndex = 0;
   let galleryItems = [];
@@ -310,8 +379,10 @@ const allPostMedia = document.querySelectorAll('.post-media');
       item.addEventListener('click', () => openGallery(index, media));
     });
   });
-
-  const galleryOverlay = document.getElementById('imageOverlay');
+  
+}
+// Media Overlay N Gallery
+const galleryOverlay = document.getElementById('imageOverlay');
   const mediaContainer = galleryOverlay.querySelector('.gallery-content');
   const ImagecloseBtn = galleryOverlay.querySelector('.close-btn');
 
@@ -363,4 +434,3 @@ const allPostMedia = document.querySelectorAll('.post-media');
       }
     }
   });
-}

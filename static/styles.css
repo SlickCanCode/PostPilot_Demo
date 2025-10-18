@@ -394,6 +394,13 @@ li > .dropdown{
       resize: none;
     
     }
+    .post-media .btn-close{
+     position: absolute;
+     top: 10px;
+    right: 10px;
+    background-color: #b9b9b9;
+    padding: 0.5rem;
+    }
     .bottom-actions {
       background: #fff;
       display: flex;
@@ -423,6 +430,7 @@ li > .dropdown{
     .date-view, .platforms-view{
       font-size: 14px;
       font-weight: 600;
+      text-align: center;
     }
     .bottom-actions .action-btn{
       background: transparent;
@@ -536,12 +544,15 @@ li > .dropdown{
 .post-media .media-item {
   position: relative;
 }
+#scheduler .post-media .media-item{
+  background-color: #c2c2c257;
+}
 
 .post-media img,
 .post-media video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   cursor: pointer;
   border-radius: 4px;
