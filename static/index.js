@@ -218,8 +218,16 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
 
     event.preventDefault();
 
-    const form = this;
+    const form = this;    
     postButton.disabled = true;
+    postButton.innerHTML = "";
+    // spinner
+    let span1 = document.createElement('span');
+    span1.classList.add('spinner-border','spinner-border-sm');
+    span1.ariaHidden = "true";
+    postButton.appendChild(span1);
+
+
     console.log("Uploading multiple files to Cloudinary (parallel)...");
 
     try {
@@ -250,7 +258,6 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
       console.log("All uploads complete:", uploadedUrls);
 
       form.submit();
-      postButton.disabled = false;
 
     } catch (error) {
       console.error("Error uploading to Cloudinary:", error);
