@@ -26,14 +26,13 @@
     </div>
     {% if post and post.image %}
       <div class="post-media" data-media='{{ post.image | tojson | safe }}' >
-        <button type="button" class="btn-close" aria-label="Close"></button>
           {% set file_url = post.image %}
             {% for i in file_url %}
             <div class="media-item">
             {% if i|is_image %}
-      <img src="{{i}}" alt=""> 
+      <img src="{{i}}" alt="" class="post-image"> 
           {% elif i|is_video %}
-      <video src="{{i}}" controls></video>
+      <video src="{{i}}" class="post-image post-video" controls></video>
           {% endif %}
             </div>
           {% endfor %}
@@ -56,13 +55,13 @@
       </div>
       <div class="actions">
         <button class="btn p-2 border-0 bg-transparent" type="button">
-        <input type="file" name="image" multiple accept="image/*,video/*" id="image-upload" hidden>
-        <label for="image-upload"><img src="/static/assets/image icon.png" alt="upload" class="upload-image"></label>
+        <input type="file" name="image" multiple accept="image/*,video/*"  id="image-upload" hidden>
+        <label for="image-upload"><img src="{{ url_for('static', filename = 'assets/image icon.png')}}" alt="upload" class="upload-image"></label>
         </button>
                 
-        <button class="action-btn" data-bs-toggle="modal" data-bs-target="#dateModal" type="button" id="SelectDatebtn"><img src="/static/assets/calendar-plus.svg" alt=""></button>
-        <button class="action-btn" type="button" data-bs-toggle="modal" data-bs-target="#platformModal" id="platformBtn"><img src="/static/assets/twitch.svg" alt=""></button>
-        <button class="generate-caption btn btn-primary" type="button"><img src="/static/assets/claude 1.svg" alt=""><span>Ai generated caption</span></button>
+        <button class="action-btn" data-bs-toggle="modal" data-bs-target="#dateModal" type="button" id="SelectDatebtn"><img src="{{url_for('static', filename='assets/calendar-plus.svg')}}" alt=""></button>
+        <button class="action-btn" type="button" data-bs-toggle="modal" data-bs-target="#platformModal" id="platformBtn"><img src="{{url_for('static', filename='assets/twitch.svg')}}" alt=""></button>
+        <button class="generate-caption btn btn-primary" type="button"><img src="{{url_for('static', filename='assets/claude 1.svg')}}" alt=""><span>Ai generated caption</span></button>
       </div>
         
     </div>

@@ -9,7 +9,6 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 
 def schedule_post(caption, image, time_scheduled, platforms,post_id=None): 
-    print(Post.__table__)
     if not image or image == [None] or image == ['']:
         image = None
     if post_id:

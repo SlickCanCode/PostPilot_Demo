@@ -95,7 +95,7 @@ let selectedFiles = [];
 
 // For Existing Posts 
 if (previewContainer.hasAttribute('data-media')) { 
-  deleteButton.style.zIndex = 999;
+  
   const mediaItems = previewContainer.querySelectorAll('.media-item');
   const mediaCount = mediaItems.length;
   previewContainer.classList.remove('single', 'double', 'grid');
@@ -105,10 +105,10 @@ if (previewContainer.hasAttribute('data-media')) {
         previewContainer.classList.add('grid');
         mediaItems.forEach((item, i) => { item.style.display = i < 4 ? 'block' : 'none'; });
 
-        if (count > 4) {
+        if (mediaCount > 4) {
           const overlay = document.createElement('div');
           overlay.className = 'more-overlay';
-          overlay.textContent = `+${count - 4}`;
+          overlay.textContent = `+${mediaCount - 4}`;
           previewContainer.appendChild(overlay);
 
           overlay.addEventListener('click', () => {
@@ -123,44 +123,49 @@ if (previewContainer.hasAttribute('data-media')) {
         const media = JSON.parse(previewContainer.dataset.media);
         item.addEventListener('click', () => openGallery(index, media));
       });
+      previewContainer.appendChild(deleteButton);
 
-} else {
+} 
   input.addEventListener('change', (e) => {
         previewContainer.innerHTML = '';
         selectedFiles = Array.from(e.target.files);
         
-        const mediaUrls = selectedFiles.map(file => URL.createObjectURL(file));
+        const mediaFiles = selectedFiles.map(file => ({
+          url: URL.createObjectURL(file),
+          type: file.type,
+        }));
+        
+
 
     // Store them in the same format as real posts
-    previewContainer.dataset.media = JSON.stringify(mediaUrls);
+    previewContainer.dataset.media = JSON.stringify(mediaFiles);
 
     // Set layout style dynamically
     previewContainer.className = 'post-media';
-    const count = mediaUrls.length;
+    const count = mediaFiles.length;
     if (count === 1) previewContainer.classList.add('single');
     else if (count === 2) previewContainer.classList.add('double');
     else if (count >= 3) previewContainer.classList.add('grid');
 
     // Create media items
-    mediaUrls.forEach((url, index) => {
+    mediaFiles.forEach((file, index) => {
       const div = document.createElement('div');
       div.classList.add('media-item');
       div.dataset.index = index;
 
-      const ext = url.split('.').pop().toLowerCase();
-
-      if (['mp4', 'webm', 'ogg'].includes(ext)) {
+        if (file.type.startsWith('video/')) {
         const video = document.createElement('video');
-        video.src = url;
+        video.src = file.url;
         video.className = 'post-video post-image';
         video.muted = true;
         video.loop = true;
         video.autoplay = true;
         video.playsInline = true;
         div.appendChild(video);
-      } else {
+        
+      } else if (file.type.startsWith('image/')) {
         const img = document.createElement('img');
-        img.src = url;
+        img.src = file.url;
         img.alt = 'preview';
         img.className = 'post-image';
         div.appendChild(img);
@@ -197,12 +202,13 @@ if (previewContainer.hasAttribute('data-media')) {
 
     previewContainer.appendChild(deleteButton);
   });
-}
+
+
+
 
 deleteButton.addEventListener('click',function () {
   input.value = ""; 
   previewContainer.innerHTML = "";
-  deleteButton.style.display = "none";
 })
 
 
@@ -256,7 +262,8 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
 
 
 // platforms script
-document.getElementById("savePlatforms").addEventListener("click", function () {
+document.getElementById("savePlatforms").addEventListener("click", savePlatforms)
+function savePlatforms() {
     const checkboxes = document.querySelectorAll("input[name='platforms']:checked");
     const platformPreview = document.querySelector('.platforms-view');
 
@@ -266,7 +273,8 @@ document.getElementById("savePlatforms").addEventListener("click", function () {
     } else {
       platformPreview.textContent = "";
     }
-  });
+  }
+savePlatforms();
 
 
 if (window.visualViewport) {
@@ -326,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// Delete Modal
+// Delete Post Modal
   let selectedForm = null;
 
   // When modal is about to show
@@ -396,19 +404,33 @@ const galleryOverlay = document.getElementById('imageOverlay');
   function showGalleryMedia() {
     mediaContainer.innerHTML = '';
     const src = galleryItems[galleryIndex];
-    const ext = src.split('.').pop().toLowerCase();
+    let ext; 
     let element;
+    if (typeof src === "string") {
+       ext = src.split('.').pop().toLowerCase();   
+        if (['mp4', 'webm', 'ogg'].includes(ext)) {
+        element = document.createElement('video');
+        element.src = src;
+        element.controls = true;
+        element.autoplay = true;
+      } else {
+        element = document.createElement('img');
+        element.src = src;
+      }
 
-    if (['mp4', 'webm', 'ogg'].includes(ext)) {
-      element = document.createElement('video');
-      element.src = src;
-      element.controls = true;
-      element.autoplay = true;
-    } else {
-      element = document.createElement('img');
-      element.src = src;
+    }else {
+      ext = src.type;
+      if (ext.startsWith('video/')) {
+        element = document.createElement('video');
+        element.src = src.url;
+        element.controls = true;
+        element.autoplay = true;
+      } else {
+        element = document.createElement('img');
+        element.src = src.url;
+      }
     }
-
+    
     element.className = 'gallery-media';
     mediaContainer.appendChild(element);
   }
