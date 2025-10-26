@@ -54,6 +54,11 @@ def displayPosts():
     print(userDetails.username)
     return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts, userDetails = userDetails)
 
+@app.route('/')
+def index():
+    return redirect('/home')
+
+
 @app.route('/about-postpilot')
 def aboutPage():
     return render_template('about.html')
