@@ -1,4 +1,10 @@
-from models.user import User, session, demo_userid
+from models.models import User, session
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+demo_userid = os.getenv("DEMO_USER_ID")
 
 class UserDetails:
     def __init__(self, username,profilepic):

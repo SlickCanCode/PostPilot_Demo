@@ -1,10 +1,9 @@
-from models.post import Post, session
-from models.user import demo_userid
+from models.models import Post, session
+from .userService import demo_userid
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-
 
 
 

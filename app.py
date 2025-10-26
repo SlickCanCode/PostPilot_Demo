@@ -1,18 +1,22 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, jsonify
 from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, start_scheduler
 from services.userService import getUser
+from services.sendEmail import send_email
 from datetime import datetime
+from models.models import db
 import json
 import os
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") 
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False 
+db.init_app(app)
 
 with app.app_context():
     start_scheduler(app)
 
 @app.route('/post', defaults={'post_id': None})
-@app.route('/post/<int:post_id>')
+@app.route('/post/<string:post_id>')
 def post(post_id):
     if post_id:
         post = getPost(post_id)
@@ -49,6 +53,27 @@ def displayPosts():
     userDetails = getUser()
     print(userDetails.username)
     return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts, userDetails = userDetails)
+
+@app.route('/about-postpilot')
+def aboutPage():
+    return render_template('about.html')
+
+@app.route('/contactMe', methods=['POST'])
+def contact_me():
+    data = request.get_json()
+    
+    name = data.get('name')
+    email = data.get('email')
+    message = data.get('message')
+    response = send_email(name,email,message)
+
+    if "error" in response:
+        return jsonify({"error": "An Error Occured, Pls try again"}), 500
+    else:
+        return jsonify({"success": "message sent"}),200
+
+
+
 
 
 # Jinja filters
