@@ -546,7 +546,7 @@ li > .dropdown{
       background-color: #1F70CD;
       color: white;
       font-size: 12px;
-      padding: 0.1rem 1rem;
+      padding: 5px 7px;
       border-radius: 16px;
       border: none;
      }
@@ -557,6 +557,7 @@ li > .dropdown{
       line-height: 1;
       padding-left: 0.5rem;
      }
+     
     /* Close button */
   .close-btn {
     position: absolute;
