@@ -549,9 +549,12 @@ li > .dropdown{
       padding: 0.1rem 1rem;
       border-radius: 16px;
       border: none;
-      height: 35px;
+     }
+     .generate-caption img{
+      vertical-align: middle;
      }
      .generate-caption span{
+      line-height: 1;
       padding-left: 0.5rem;
      }
     /* Close button */
