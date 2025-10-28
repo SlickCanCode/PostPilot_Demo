@@ -273,16 +273,23 @@ savePlatforms();
 
 
 if (window.visualViewport) {
-      const bottomActions = document.getElementById('bottomActions');
-      window.visualViewport.addEventListener('resize', () => {
-        if (window.innerWidth <= 768) {
-          const keyboardHeight = window.innerHeight - window.visualViewport.height;
-          bottomActions.style.bottom = keyboardHeight > 0 ? keyboardHeight + 'px' : '0';
-        } else {
-          bottomActions.style.bottom = '0';
-        }
-      });
+  const bottomActions = document.getElementById('bottomActions');
+
+  const updateBottomPosition = () => {
+    if (window.innerWidth <= 768) {
+      const offsetY = window.visualViewport.offsetTop;
+      const keyboardHeight = window.innerHeight - window.visualViewport.height - offsetY;
+      bottomActions.style.bottom = keyboardHeight > 0 ? keyboardHeight + 'px' : '0';
+    } else {
+      bottomActions.style.bottom = '0';
     }
+  };
+
+  // Listen for viewport size and position changes
+  window.visualViewport.addEventListener('resize', updateBottomPosition);
+  window.visualViewport.addEventListener('scroll', updateBottomPosition);
+}
+
 
     // Media gallery
 const galleryOverlay = document.getElementById('imageOverlay');
@@ -306,6 +313,7 @@ const galleryOverlay = document.getElementById('imageOverlay');
         if (['mp4', 'webm', 'ogg'].includes(ext)) {
         element = document.createElement('video');
         element.src = src;
+        element.playsInline
         element.controls = true;
         element.autoplay = true;
       } else {
