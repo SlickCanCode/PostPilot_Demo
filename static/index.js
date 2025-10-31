@@ -149,3 +149,4 @@ const galleryOverlay = document.getElementById('imageOverlay');
       }
     }
   });
+

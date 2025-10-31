@@ -590,7 +590,6 @@ li > .dropdown{
       }
       .bottom-actions {
         border-top: none;
-        margin-left: 72px;
       }
     }
 
@@ -839,19 +838,19 @@ li > .dropdown{
   height: 53px;
   border-radius: 8px;
   border: 1px solid black;
-  font-size: 14px;
+  font-size: 16px;
   padding: 0.5rem;
   width: 100%;
 }
 .about-contact input::placeholder, .about-contact textarea::placeholder{
-  font-size: 14px;
+  font-size: 16px;
   padding: 0.5rem;
 }
 .about-contact textarea {
   height: 80px;
   border-radius: 8px;
   border: 1px solid black;
-  font-size: 14px;
+  font-size: 16px;
   padding: 0.5rem;
   width: 100%;
 }
@@ -871,4 +870,21 @@ footer {
   text-align: center;
   padding: 20px;
   font-size: 14px;
+}
+
+.desktop-body{
+  background-color: #111111;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+.desktop-body p{
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+}
+.desktop-header{
+  font-size: 50px;
+  color: white;
 }

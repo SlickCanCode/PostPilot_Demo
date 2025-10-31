@@ -1,3 +1,6 @@
+
+
+
 // Client side form validation 
   const postButton = document.getElementById('postButton');
   const captionInput = document.getElementById('caption');
@@ -201,7 +204,7 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
 
     event.preventDefault();
 
-    const form = this;    
+    const form = this;
     scheduleLoading();
 
 
@@ -228,7 +231,9 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
 
       // Wait for all uploads to complete
       const results = await Promise.all(uploadPromises);
-      const uploadedUrls = results.map(r => r.secure_url);
+      const uploadedUrls = results.map(r =>
+  r.secure_url.replace("/upload/", "/upload/f_auto,q_auto,w_1200/")
+);
 
       // Save URLs in hidden field (as JSON)
       document.querySelector(".file-url").value = JSON.stringify(uploadedUrls);

@@ -15,6 +15,18 @@ db.init_app(app)
 with app.app_context():
     start_scheduler(app)
 
+#restricted to mobile devices
+def is_mobile(user_agent: str) -> bool:
+    mobile_keywords = ["iphone", "android", "ipad", "mobile", "ipod", "blackberry"]
+    return any(keyword in user_agent.lower() for keyword in mobile_keywords)
+
+@app.before_request
+def restrict_to_mobile():
+    user_agent = request.headers.get("User-Agent", "")
+    if not is_mobile(user_agent):
+        return render_template("desktop.html"), 403
+
+
 @app.route('/post', defaults={'post_id': None})
 @app.route('/post/<string:post_id>')
 def post(post_id):
