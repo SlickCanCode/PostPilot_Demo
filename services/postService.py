@@ -2,7 +2,6 @@ from models.models import Post, session
 from .userService import demo_userid
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 
@@ -81,15 +80,10 @@ def deletePost(post_id):
     else:
         print("Post not found.")
 
-def check_scheduled_posts(app):
-    with app.app_context():
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        posts = session.query(Post).filter(Post.time_scheduled <= now, Post.status == "Pending").all()
-        for post in posts:
-            post.status = "Posted"
+def check_scheduled_posts(session):
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    posts = session.query(Post).filter(Post.time_scheduled <= now, Post.status == "Pending").all()
+    for post in posts:
+        post.status = "Posted"
         session.commit()
 
-def start_scheduler(app):
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(func=lambda: check_scheduled_posts(app), trigger="interval", seconds=60)
-    scheduler.start()

@@ -1,9 +1,10 @@
 from flask import Flask, request, redirect, render_template, jsonify
-from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, start_scheduler
+from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, check_scheduled_posts
 from services.userService import getUser
 from services.sendEmail import send_email
 from datetime import datetime
 from models.models import db
+from apscheduler.schedulers.background import BackgroundScheduler
 import json
 import os
 
@@ -12,8 +13,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False 
 db.init_app(app)
 
-with app.app_context():
-    start_scheduler(app)
+scheduler = BackgroundScheduler()
+scheduler.add_job(check_scheduled_posts, 'interval', seconds=30, args=[db.session])
+scheduler.start()
 
 #restricted to mobile devices
 def is_mobile(user_agent: str) -> bool:
