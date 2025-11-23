@@ -491,7 +491,7 @@ li > .dropdown{
       border: none;
       outline: none;
       min-height: 56px;       /* default ~3 lines */
-  max-height: 600px;  
+  max-height: 50vh;  
   line-height: 1.4;
       width: 100%;
       font-size: 1rem;
@@ -663,7 +663,9 @@ li > .dropdown{
   cursor: pointer;
   border-radius: 4px;
 }
-
+.post-media video{
+  height: 100%;
+}
 #mediaContainer {
   position: relative;
   overflow: hidden;

@@ -1,21 +1,26 @@
-from flask import Flask, request, redirect, render_template, jsonify
-from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, check_scheduled_posts
+from flask import Flask, request, redirect, render_template, jsonify, url_for
+from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, handle_mediacompression, upload_media, check_scheduled_posts, start_scheduler
 from services.userService import getUser
 from services.sendEmail import send_email
 from datetime import datetime
 from models.models import db
-from apscheduler.schedulers.background import BackgroundScheduler
-import json
 import os
 
+
+
+
+
+
 app = Flask(__name__)
+with app.app_context():
+    start_scheduler(app)
+
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
+
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False 
 db.init_app(app)
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(check_scheduled_posts, 'interval', seconds=30, args=[db.session])
-scheduler.start()
 
 #restricted to mobile devices
 def is_mobile(user_agent: str) -> bool:
@@ -26,8 +31,7 @@ def is_mobile(user_agent: str) -> bool:
 def restrict_to_mobile():
     user_agent = request.headers.get("User-Agent", "")
     if not is_mobile(user_agent):
-        return render_template("desktop.html"), 403
-
+        return render_template("desktop.html")
 
 @app.route('/post', defaults={'post_id': None})
 @app.route('/post/<string:post_id>')
@@ -40,18 +44,20 @@ def post(post_id):
 
 @app.route('/schedule-post', methods=['POST'])
 def handle_schedule():
-    if request.method == 'POST':
 
-        post_id = request.form.get('post_id')
-        caption = request.form.get('caption')
-        time_scheduled = request.form.get('time_scheduled')
-        file_url = request.form.get('file-url')
-        if file_url:
-            file_url = json.loads(file_url)
-        platform = request.form.getlist('platforms')
-        print(file_url)
-        schedule_post(caption=caption or None, image=file_url or None, time_scheduled=time_scheduled, platforms=platform, post_id=post_id)
-        return redirect('/home')
+    files = request.files.getlist('image')
+
+    compressed_media = handle_mediacompression(files)
+    media_links = upload_media(compressed_media)
+    
+    post_id = request.form.get('post_id')
+    caption = request.form.get('caption')
+    time_scheduled = request.form.get('time_scheduled')
+    platform = request.form.getlist('platforms')
+
+    schedule_post(caption=caption or None, image=media_links or None, time_scheduled=time_scheduled, platforms=platform, post_id=post_id)
+    return redirect('/home')
+
 
 @app.route('/delete_post', methods=['POST'])
 def handle_deletePost():
@@ -65,7 +71,6 @@ def displayPosts():
     pendingPosts = getPendingPosts()
     postedPosts = getPostedPosts()
     userDetails = getUser()
-    print(userDetails.username)
     return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts, userDetails = userDetails)
 
 @app.route('/')
@@ -90,6 +95,13 @@ def contact_me():
         return jsonify({"error": "An Error Occured, Pls try again"}), 500
     else:
         return jsonify({"success": "message sent"}),200
+
+
+
+#Error Handlers
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return error + '\nFile too large! Maximum allowed size is 200MB.'
 
 
 

@@ -26,7 +26,8 @@ function togglePostButton(){
   togglePostButton();
 
 document.querySelector(".generate-caption").disabled = true;
-
+  const twitterMax = 280
+  const twitterPlatform = document.getElementById("twitter");
 // caption script
 window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('caption').focus();
@@ -36,7 +37,18 @@ const textarea = document.querySelector(".caption-input");
 textarea.addEventListener("input", () => {
   textarea.style.height = "auto"; 
   textarea.style.height = textarea.scrollHeight + "px"; // grow with content
+
+  // Twitter Condition
+    let caption_input = textarea.value
+    if (caption_input.length > twitterMax) {
+      twitterPlatform.disabled = true;
+    }else {
+      twitterPlatform.disabled = false;
+    }
+
 });
+
+
 
 // Date script
     const scheduledDateTimeInput = document.getElementById('scheduledDateTime');
@@ -198,56 +210,22 @@ function setLayout(container, firstItem, count) {
 }
 
 
-//Upload Media to Cloud
 document.getElementById('scheduler-form').addEventListener('submit', async function (event) {
-  if (selectedFiles && selectedFiles.length > 0) {
-
     event.preventDefault();
+     const form = this
 
-    const form = this;
-    scheduleLoading();
-
-
-    console.log("Uploading multiple files to Cloudinary (parallel)...");
-
-    try {
-      // Map each file to an upload promise
-      const uploadPromises = selectedFiles.map(file => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "postpilot");
-
-        return fetch("https://api.cloudinary.com/v1_1/dm340hnd3/auto/upload", {
-          method: "POST",
-          body: formData
-        }).then(async res => {
-          if (!res.ok) {
-            const text = await res.text();
-            throw new Error(`Upload failed: ${res.status} ${res.statusText}\n${text}`);
-          }
-          return res.json();
-        });
-      });
-
-      // Wait for all uploads to complete
-      const results = await Promise.all(uploadPromises);
-      const uploadedUrls = results.map(r =>
-  r.secure_url.replace("/upload/", "/upload/f_auto,q_auto,w_1200/")
-);
-
-      // Save URLs in hidden field (as JSON)
-      document.querySelector(".file-url").value = JSON.stringify(uploadedUrls);
-      console.log("All uploads complete:", uploadedUrls);
-
-      form.submit();
-
-    } catch (error) {
-      console.error("Error uploading to Cloudinary:", error);
-      alert("One or more uploads failed. Please try again.");
-      postButton.disabled = false;
-    }
-  }
-});
+     for (const file of selectedFiles) {
+      const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+        if (sizeInMB > 200) {
+          alert("file size too large!, a smaller sized video will make scheduling faster...");
+          break;
+        } else {
+          form.submit()
+          scheduleLoading();
+        }
+     }
+     });
+     
 
 function scheduleLoading() {
   postButton.disabled = true;

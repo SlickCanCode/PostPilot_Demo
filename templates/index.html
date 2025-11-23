@@ -41,7 +41,7 @@
                             {% if post.image %}
                             {% set ext = post.image[0].split('.')[-1] | lower %}
                             {% if ext in ['mp4', 'webm', 'ogg'] %}
-                                <video class="post-image" controls>
+                                <video class="post-image">
                                     <source src="{{ post.image[0] }}" type="video/{{ ext }}">
                                     Your browser does not support the video tag.
                                 </video>
@@ -96,7 +96,7 @@
                     <img src="" alt="">
                 </div>
                 <div class="profile-info">
-                    <p>{{userDetails.username}} <br><span>{{ post.time_scheduled|smartdate }}</span></p>
+                    <p>PostPilot <br><span>{{ post.time_scheduled|smartdate }}</span></p>
                 </div>
                 
                 <div class="dropdown">

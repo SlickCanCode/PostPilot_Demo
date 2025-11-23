@@ -4,4 +4,7 @@ sqlalchemy
 apscheduler
 python-dotenv
 flask_sqlalchemy
+pillow
+ffmpeg
+cloudinary
 waitress
