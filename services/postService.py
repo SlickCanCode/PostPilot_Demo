@@ -3,7 +3,6 @@ from .userService import demo_userid
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from apscheduler.schedulers.background import BackgroundScheduler
 from werkzeug.utils import secure_filename
 from PIL import Image
 from dotenv import load_dotenv
@@ -23,10 +22,10 @@ cloudinary.config(
       secure = True
   )
 
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+UPLOAD_FOLDER = 'uploads'
 def handle_mediacompression(files):
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     compressed_media = []
     for file in files:
         if file and file.filename != '':
@@ -154,15 +153,11 @@ def deletePost(post_id):
     else:
         print("Post not found.")
 
-def check_scheduled_posts(app):
-    with app.app_context():
+def post_scheduled_posts():
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         posts = session.query(Post).filter(Post.time_scheduled <= now, Post.status == "Pending").all()
         for post in posts:
             post.status = "Posted"
+            session.commit()
 
-def start_scheduler(app):
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(func=lambda: check_scheduled_posts(app), trigger="interval", seconds=60)
-    scheduler.start()
 
