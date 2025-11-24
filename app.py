@@ -19,9 +19,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False 
 db.init_app(app)
 
-@app.route('/run-tasks')
-def run_tasks():
-    post_scheduled_posts()
 
 #restricted to mobile devices
 def is_mobile(user_agent: str) -> bool:
@@ -73,6 +70,11 @@ def displayPosts():
     postedPosts = getPostedPosts()
     userDetails = getUser()
     return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts, userDetails = userDetails)
+
+@app.route('/run-tasks')
+def run_tasks():
+    post_scheduled_posts()
+    return redirect('/home')
 
 @app.route('/')
 def index():
