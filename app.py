@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, render_template, jsonify, url_for
-from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, handle_mediacompression, upload_media
+from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, handle_mediacompression, upload_media, post_scheduled_posts
 from services.userService import getUser
 from services.sendEmail import send_email
 from datetime import datetime
@@ -18,6 +18,10 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False 
 db.init_app(app)
+
+@app.route('/run-tasks')
+def run_tasks():
+    post_scheduled_posts()
 
 #restricted to mobile devices
 def is_mobile(user_agent: str) -> bool:
