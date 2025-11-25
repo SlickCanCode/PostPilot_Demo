@@ -1,7 +1,7 @@
 from models.models import Post, session
 from .userService import demo_userid
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -154,10 +154,22 @@ def deletePost(post_id):
         print("Post not found.")
 
 def post_scheduled_posts():
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        posts = session.query(Post).filter(Post.time_scheduled <= now, Post.status == "Pending").all()
-        for post in posts:
-            post.status = "Posted"
-            session.commit()
+    now = datetime.now(timezone.utc)
+    print("CURRENT TIME:", now)
+
+    posts = (
+        session.query(Post)
+        .filter(Post.time_scheduled <= now, Post.status == "Pending")
+        .all()
+    )
+
+    print(f"FOUND {len(posts)} POSTS TO UPDATE")
+
+    for post in posts:
+        post.status = "Posted"
+
+    session.commit()
+
+    print("UPDATE COMPLETE")
 
 

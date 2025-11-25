@@ -77,7 +77,9 @@ def displayPosts():
 @app.route('/run-tasks', methods=["GET"])
 def run_tasks():
     with app.app_context():
+        print("I got here")
         post_scheduled_posts()
+        print("I got here again before")
     return "Tasks executed"
 
 @app.route('/')
