@@ -157,27 +157,22 @@ def deletePost(post_id):
         print("Post not found.")
 
 def post_scheduled_posts():
-    NIGERIA_TZ = timezone(timedelta(hours=1))
     try:
         with current_app.app_context():  
             now = datetime.now(NIGERIA_TZ)
             print("CURRENT TIME (UTC):", now)
 
             # Query pending posts
-            posts = (
-                session.query(Post)
-                .filter(Post.time_scheduled <= now, Post.status == "Pending")
-                .all()
-            )
-
+            posts = (session.query(Post).filter(Post.status == "Pending").all())
             print(f"FOUND {len(posts)} POSTS TO UPDATE")
-
             for post in posts:
-                post.status = "Posted"
+                scheduled = post.time_scheduled.replace(tzinfo=NIGERIA_TZ)
+                if scheduled <= now:
+                    post.status = "Posted"
 
             session.commit()
-            return "UPDATE COMPLETE, CURRENT TIME (UTC):" + now
+            return "UPDATE COMPLETE"
 
     except Exception as e:
-        return "CRON ERROR:" + e
+        return e
 
