@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.utils import secure_filename
 from PIL import Image
 from dotenv import load_dotenv
+from flask import current_app
 import ffmpeg
 import cloudinary
 import cloudinary.uploader
@@ -154,22 +155,28 @@ def deletePost(post_id):
         print("Post not found.")
 
 def post_scheduled_posts():
-    now = datetime.now(timezone.utc)
-    print("CURRENT TIME:", now)
+    print("CRON TASK STARTED")
 
-    posts = (
-        session.query(Post)
-        .filter(Post.time_scheduled <= now, Post.status == "Pending")
-        .all()
-    )
+    try:
+        with current_app.app_context():   # ensure app context
+            now = datetime.now(timezone.utc)
+            print("CURRENT TIME (UTC):", now)
 
-    print(f"FOUND {len(posts)} POSTS TO UPDATE")
+            # Query pending posts
+            posts = (
+                session.query(Post)
+                .filter(Post.time_scheduled <= now, Post.status == "Pending")
+                .all()
+            )
 
-    for post in posts:
-        post.status = "Posted"
+            print(f"FOUND {len(posts)} POSTS TO UPDATE")
 
-    session.commit()
+            for post in posts:
+                post.status = "Posted"
 
-    print("UPDATE COMPLETE")
+            session.commit()
+            return "UPDATE COMPLETE"
 
+    except Exception as e:
+        return "CRON ERROR:" + e
 

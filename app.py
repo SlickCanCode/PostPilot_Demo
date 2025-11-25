@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, jsonify, url_for
+from flask import Flask, request, redirect, render_template, jsonify
 from services.postService import schedule_post, getPostedPosts, getPendingPosts, deletePost, getPost, handle_mediacompression, upload_media, post_scheduled_posts
 from services.userService import getUser
 from services.sendEmail import send_email
@@ -76,11 +76,10 @@ def displayPosts():
 
 @app.route('/run-tasks', methods=["GET"])
 def run_tasks():
+    response = None
     with app.app_context():
-        print("I got here")
-        post_scheduled_posts()
-        print("I got here again before")
-    return "Tasks executed"
+        response = post_scheduled_posts()
+    return response
 
 @app.route('/')
 def index():
