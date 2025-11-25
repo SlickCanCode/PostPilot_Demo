@@ -176,7 +176,7 @@ def post_scheduled_posts():
                 post.status = "Posted"
 
             session.commit()
-            return "UPDATE COMPLETE"
+            return "UPDATE COMPLETE, CURRENT TIME (UTC):" + now
 
     except Exception as e:
         return "CRON ERROR:" + e
