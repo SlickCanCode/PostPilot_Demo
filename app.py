@@ -73,13 +73,13 @@ def displayPosts():
 
 @app.route('/run-tasks')
 def run_tasks():
-    post_scheduled_posts()
+    with app.app_context():
+        post_scheduled_posts()
     return redirect('/home')
 
 @app.route('/')
 def index():
     return redirect('/home')
-
 
 @app.route('/about-postpilot')
 def aboutPage():
