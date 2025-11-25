@@ -74,12 +74,11 @@ def displayPosts():
     userDetails = getUser()
     return render_template('index.html', pendingPosts=pendingPosts, postedPosts=postedPosts, userDetails = userDetails)
 
-@app.route('/run-tasks')
+@app.route('/run-tasks', methods=["GET"])
 def run_tasks():
     with app.app_context():
         post_scheduled_posts()
-        print("i got here")
-    return redirect('/home')
+    return "Tasks executed"
 
 @app.route('/')
 def index():
