@@ -157,10 +157,9 @@ def deletePost(post_id):
         print("Post not found.")
 
 def post_scheduled_posts():
-    print("CRON TASK STARTED")
-
+    NIGERIA_TZ = timezone(timedelta(hours=1))
     try:
-        with current_app.app_context():   # ensure app context
+        with current_app.app_context():  
             now = datetime.now(NIGERIA_TZ)
             print("CURRENT TIME (UTC):", now)
 
