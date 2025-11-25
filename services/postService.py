@@ -1,7 +1,7 @@
 from models.models import Post, session
 from .userService import demo_userid
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -25,6 +25,8 @@ cloudinary.config(
 
 
 UPLOAD_FOLDER = 'uploads'
+NIGERIA_TZ = timezone(timedelta(hours=1))
+
 def handle_mediacompression(files):
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     compressed_media = []
@@ -159,7 +161,7 @@ def post_scheduled_posts():
 
     try:
         with current_app.app_context():   # ensure app context
-            now = datetime.now(timezone.utc)
+            now = datetime.now(NIGERIA_TZ)
             print("CURRENT TIME (UTC):", now)
 
             # Query pending posts
