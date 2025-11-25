@@ -27,9 +27,12 @@ def is_mobile(user_agent: str) -> bool:
 
 @app.before_request
 def restrict_to_mobile():
+    if request.path.startswith("/run-tasks"):
+        return
     user_agent = request.headers.get("User-Agent", "")
     if not is_mobile(user_agent):
         return render_template("desktop.html")
+    
 
 @app.route('/post', defaults={'post_id': None})
 @app.route('/post/<string:post_id>')
@@ -75,6 +78,7 @@ def displayPosts():
 def run_tasks():
     with app.app_context():
         post_scheduled_posts()
+        print("i got here")
     return redirect('/home')
 
 @app.route('/')
