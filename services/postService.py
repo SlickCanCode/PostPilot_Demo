@@ -53,12 +53,15 @@ def compress_image(input_path, output_path, quality=70):
 
 def compress_video(input_path, output_path, crf=28):
     print("i got here")
-    (
-        ffmpeg
+    try: 
+        (
+        ffmpeg 
         .input(input_path)
         .output(output_path, vcodec='libx264', crf=crf, preset='fast')
         .run(overwrite_output=True)
-    )
+        )
+    except ffmpeg.Error as e:
+        print(f"Error during conversion: {e.stderr.decode('utf8')}")
 
 
 def upload_media(compressed_media):
