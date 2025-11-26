@@ -10,7 +10,7 @@ with app.app_context():
     new_user = User(
         username="demoUser",
         password="demouser",      # normally you'd hash this before saving
-        profile_pic=None
+        profile_pic= "https://res.cloudinary.com/dm340hnd3/image/upload/v1764020381/wdi3v2ekt1bm99uxlk5j.webp"
     )
 
     # Add to session and commit
@@ -19,4 +19,4 @@ with app.app_context():
 
     print("User created successfully!")
     print(f"User ID: {new_user.id}")
-    demoUser_id = new_user.id
+

@@ -109,6 +109,11 @@ def contact_me():
 def request_entity_too_large(error):
     return error + '\nFile too large! Maximum allowed size is 200MB.'
 
+@app.errorhandler(405)
+def methodNotAllowed(error):
+    return redirect('/home')
+
+
 
 
 

@@ -222,6 +222,7 @@ document.getElementById('scheduler-form').addEventListener('submit', async funct
         } else {
           form.submit()
           scheduleLoading();
+          
         }
      }
      });
